@@ -40,3 +40,4 @@ $skip = array("logs", "cache");<br /><br />
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
+For more info contact luca@neting.it or visit web design at https://www.neting.it
