@@ -26,13 +26,13 @@ $extExclude = array("png","jpg","gif","bmp","tiff","jpeg","zip");<br /><br />
 // directories to ignore, an empty array will check all directories<br />
 $skip = array("logs", "cache");<br /><br />
 
-<h2>How to run this script</h2><br /><br />
+<h2>How to run this script</h2>
 
 In order to run this script you should have shell access to your server, if the script is placed out of public folder (suggested!!).<br />
 The best option is to set a daily cron task to perform regular checkup of your site. <br /><br /><br />
 
 
-<h2>License and disclaimer</h2><br /><br />
+<h2>License and disclaimer</h2>
 
 
     This program is free software; you can redistribute it and/or modify
@@ -45,7 +45,7 @@ The best option is to set a daily cron task to perform regular checkup of your s
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-<h2>Support</h2><br /><br />
+<h2>Support</h2>
 
 This is software is provided as it is without any warranty and without any support.<br /><br />
 For more info contact luca@neting.it or visit Neting.it web design web agency at https://www.neting.it
