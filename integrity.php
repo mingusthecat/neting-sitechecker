@@ -77,17 +77,12 @@ $iter = new RecursiveIteratorIterator($dir);
 while ($iter->valid()) {
     // skip unwanted directories
     if (!$iter->isDot() && !in_array($iter->getSubPath(), $skip)) {
-        // get specific file extensions
-        if (!empty($extExclude)) {
+	    // get specific file extensions
             // PHP 5.3.4: if (in_array($iter->getExtension(), $ext)) {
             if (!in_array(pathinfo($iter->key(), PATHINFO_EXTENSION), $extExclude)) {
                 $files[$iter->key()] = checkFile($iter->key());	
             }
-        } else {
-            // ignore file extensions
-            $files[$iter->key()] = checkFile($iter->key());
-			
-        }
+        
     }
     $iter->next();
 }
