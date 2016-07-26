@@ -46,7 +46,7 @@ $logFile = "/your/absolute/path/logs/logs.txt";
 $emailAddress = "your@mail.com";
 $emailSubject = "Site Guard Integrity Checker - ".PATH;
 
-// extensions to exclude from control, an empty array will return all extensions
+// extensions to exclude from control, an empty array will return all extensions (lowercase)
 $extExclude = array("png","jpg","gif","bmp","tiff","jpeg","zip");
 
 // directories to ignore, an empty array will check all directories
@@ -79,7 +79,7 @@ while ($iter->valid()) {
     if (!$iter->isDot() && !in_array($iter->getSubPath(), $skip)) {
 	    // get specific file extensions
             // PHP 5.3.4: if (in_array($iter->getExtension(), $ext)) {
-            if (!in_array(pathinfo($iter->key(), PATHINFO_EXTENSION), $extExclude)) {
+            if (!in_array(strtolower(pathinfo($iter->key(), PATHINFO_EXTENSION)), $extExclude)) {
                 $files[$iter->key()] = checkFile($iter->key());	
             }
         
