@@ -1,0 +1,4 @@
+#
+# list of files to exclude from check, one per row
+#
+rendering3d/mail.php

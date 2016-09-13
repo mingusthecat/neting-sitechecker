@@ -1,0 +1,14 @@
+#
+#list of the file extensions to exclude, one per row
+#
+png
+jpg
+gif
+bmp
+tiff
+jpeg
+zip
+pdf
+css
+doc
+svg

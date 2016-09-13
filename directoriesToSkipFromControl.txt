@@ -1,0 +1,6 @@
+#
+# list of the directory paths to exclude from check, one per row
+#
+logs
+cache
+rendering3d
