@@ -1,3 +1,5 @@
+# put the malicious patterns you want to detect, one each line
+# comment with hash sign
 ev​al(gzinflate(base​64_de​code
 ev​al(gzuncompress(base​64_de​code
 ev​al(gzinflate(str_rot13(base​64_de​code
