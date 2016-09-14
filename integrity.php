@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
 
+
 // set max execution time - check your php.ini for more
 ini_set('max_execution_time', 300);
 
@@ -49,6 +50,8 @@ $skipDir 	= array_filter	( $skipDir	, 'removeComments');
 $skipFile 	= array_filter	( $skipFile	, 'removeComments');
 $patterns 	= array_filter	( $patterns	, 'removeComments');
 
+//add quarantine extension, skip quarantined files from check
+$skipExt 	= array_push($skipExt, $extQuarantine);
 
 // ++++++++++++++++++++++++++++++++++++++++
 // start checker
@@ -66,12 +69,11 @@ if(file_exists($checkFile)) {
 
 $checkObj = json_decode($c);
 
+//initialize check variables and counters
 $mismatchLog = '';
-
 $i = 0;
 $c = 0;
 $problems = 0;
-
 $files = array();
 
 // build profile
@@ -79,21 +81,16 @@ $dir = new RecursiveDirectoryIterator(PATH);
 $iter = new RecursiveIteratorIterator($dir);
 
 // start iterator and file checker loop
-while ($iter->valid()) {
-	
-	
+while ($iter->valid()) {	
 	
     // skip unwanted directories
-    
 	if (!$iter->isDot() && !in_array($iter->getSubPath(), $skipDir)) {
 		
-        // skip unwanted extensions and files
-       
+        // skip unwanted extensions and files       
             if (!in_array(pathinfo($iter->key(), PATHINFO_EXTENSION), $skipExt) && !in_array( str_replace (PATH,"",$iter->key()), $skipFile ) ) {
                 $files[$iter->key()] = checkFile($iter->key());
 				$c++;
             }
-       
     }
 	
 	$i++;
@@ -104,7 +101,6 @@ $result = json_encode($files);
 
 // record and log check
 file_put_contents($checkFile, $result);
-
 
 	// record script execution - end time
 	$time_end = microtime(true);
@@ -154,16 +150,16 @@ if($mismatchLog != '' && !$isFirstRun){
 	$headers  = 'MIME-Version: 1.0' . "\r\n";
 	$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 
+	//format html 
+	$emailBody .= str_replace("\r\n","<br/>",$mismatchLog);
+
 	// Send
-	mail($emailAddress, $emailSubject, $emailBody . $mismatchLog, $headers);
+	mail($emailAddress, $emailSubject, $emailBody , $headers);
 	
 	// record and log checker findings
 	file_put_contents($logFile, $mismatchLog, FILE_APPEND);
 	 
 }
-
-
-
 
 //debug email
 if($sendDebugEmail){
@@ -171,13 +167,14 @@ if($sendDebugEmail){
 	// To send HTML mail, the Content-type header must be set
 	$headers  = 'MIME-Version: 1.0' . "\r\n";
 	$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-	
 
+	//format html 
+	$emailBody .= str_replace("\r\n","<br />",$mismatchLog);
+		
 	// send email
 	mail( $debugEmailAddress, $emailSubject, $emailBody, $headers);
 
 }
-
 
 
 /********************************************************************************/
@@ -187,8 +184,6 @@ if($sendDebugEmail){
 /********************************************************************************/
 /********************************************************************************/
 /********************************************************************************/
-
-
 
 function checkFile($file){
 	
@@ -262,8 +257,8 @@ function compareResult($result){
 				
 				if($setQuarantine) {
 					
-					$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " has been put in quarantine and renamed ".$result['filename'].$extQuarantine."'\r\n";
-					rename($result['file'], $result['file'].$extQuarantine);
+					$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " has been put in quarantine and renamed ".$result['filename']. "." . $extQuarantine."'\r\n";
+					rename($result['file'], $result['file'] . "." . $extQuarantine);
 				}
 				
 				
