@@ -51,7 +51,7 @@ $skipFile 	= array_filter	( $skipFile	, 'removeComments');
 $patterns 	= array_filter	( $patterns	, 'removeComments');
 
 //add quarantine extension, skip quarantined files from check
-$skipExt 	= array_push($skipExt, $extQuarantine);
+array_push($skipExt, $extQuarantine);
 
 // ++++++++++++++++++++++++++++++++++++++++
 // start checker
@@ -217,7 +217,7 @@ function compareResult($result){
 	$scan = false;
 	
 	//check if is an anexpected file
-	if(!property_exists($checkObj, $result['file'])){
+	if(!property_exists($checkObj, $result['file']) && !$isFirstRun){
 		$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file has been added to site structure \r\n";
 		$scan = true;
 		$problems++;
