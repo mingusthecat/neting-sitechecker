@@ -1,6 +1,9 @@
 <?php
 
 /*
+
+Site Checker - v. 2.1
+
 Author: Luca Mainieri
 Author URI: http://www.neting.it
 License: GPLv2
@@ -18,12 +21,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
 */
 
-
 // set max execution time - check your php.ini for more
+// Warning : This function has no effect when PHP is running in safe mode. There is no workaround other than turning off safe mode or changing the time limit in the php.ini.
+
 ini_set('max_execution_time', 300);
+
+// increase maximum amount of memory available to PHP
+ini_set('memory_limit','128M'); 
 
 // calculate script execution time
 // record script execution - start time
@@ -73,7 +79,7 @@ $checkObj = json_decode($c);
 $mismatchLog = '';
 $i = 0;
 $c = 0;
-$problems = 0;
+$issues = 0;
 $files = array();
 
 // build profile
@@ -108,35 +114,35 @@ file_put_contents($checkFile, $result);
 	//dividing with 60 will give the execution time in minutes other wise seconds
 	$execution_time = ($time_end - $time_start)/60;
 
-	$emailBody = '<b>Executed check of: </b> '.PATH.' <br /><hr>';
+	$emailBody = '<b>Executed check of: </b> '.PATH.' <br />';
 
-	//execution time of the script
-	$emailBody .= '<b>Files / Directories found:</b> '.$i.' <br /><hr>';	
+	//number of files and/or directory found in defined path
+	$emailBody .= '<b>Files / Directories found:</b> '.$i.' <br />';	
+	
+	//number of files and/or directory checked by this script
+	$emailBody .= '<b>Files / Directories checked:</b> '.$c.' <br />';	
+	
+	//issues reported
+	$emailBody .= '<b>Check report:</b> '.$issues.' issues <br />';	
 	
 	//execution time of the script
-	$emailBody .= '<b>Files / Directories checked:</b> '.$c.' <br /><hr>';	
-	
-	//execution time of the script
-	$emailBody .= '<b>Script found:</b> '.$problems.' issues to verify <br /><hr>';	
-	
-	//execution time of the script
-	$emailBody .= '<b>Total Execution Time:</b> '.$execution_time.' mins<br /><hr>';	
+	$emailBody .= '<b>Total Execution Time:</b> '.$execution_time.' mins<br />';	
 			
 	//Check results
 	if($mismatchLog != '')
-	$emailBody .= '<b>Checker script found the following '.$problems.' issues:</b> ' . $mismatchLog . '<br /><hr>';		
+	$emailBody .= '<b>Found '.$issues.' issues:</b> ' . $mismatchLog . '<br />';		
 
-	//Get settings
-	$emailBody .= '<b>Skip Extensions:</b> <pre>' . print_r($skipExt, true) . '</pre><br /><hr>';	
+	//Get settings for debug purpose
+	$emailBody .= '<b>Skip Extensions: </b>' . explode("," , $skipExt) . '<br />';	
 
-	//Get settings
-	$emailBody .= '<b>Skip Directories:</b> <pre>' . print_r($skipDir, true) . '</pre><br /><hr>';	
+	//Get settings for debug purpose
+	$emailBody .= '<b>Skip Directories: </b> ' . explode("," , $skipDir) . '<br />';	
 
-	//Get settings
-	$emailBody .= '<b>Skip Files:</b> <pre>' . print_r($skipFile, true) . '</pre><br /><hr>';	
+	//Get settings for debug purpose
+	$emailBody .= '<b>Skip Files: </b>' . explode("," , $skipFile ) . '<br />';	
 	
-	//Get settings
-	$emailBody .= '<b>Malicious Patterns:</b> <pre>' . print_r($patterns, true) . '</pre><br /><hr>';	
+	//Get settings for debug purpose
+	//$emailBody .= '<b>Malicious Patterns:</b> <pre>' . print_r($patterns, true) . '</pre><br /><hr>';	
 	
 	//Logs
 	//$emailBody .= '<b>Checker logs:</b> <pre>' . print_r($checkObj, true) . '</pre><hr>';		
@@ -210,64 +216,50 @@ function compareResult($result){
 	global $checkObj;
 	global $patterns;
 	global $isFirstRun;
-	global $problems;
+	global $issues;
 	global $setQuarantine;
 	global $extQuarantine;
 	
 	$scan = false;
 	
-	//check if is an anexpected file
-	if(!property_exists($checkObj, $result['file']) && !$isFirstRun){
-		$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file has been added to site structure \r\n";
-		$scan = true;
-		$problems++;
-		
-	}else{
-	
-		//il file ha un diverso hash
-		if($result['hash'] != $checkObj->$result['file']->hash){
+	if(!property_exists($checkObj, $result['file'])){
+			// this file has been added to structure	
+			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file has been added to site structure \r\n";
+			$scan = true;
+			$issues++;		
+	}elseif($result['hash'] != $checkObj->$result['file']->hash){
+			// this file has changed
 			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file has a different hash \r\n";
 			$scan = true;
-			$problems++;
-		}else{
-		
-			//il file ha un diverso set di permessi
-			if($result['permission'] != $checkObj->$result['file']->permission){
-				$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file has different permissions - it was ".$checkObj->$result['file']->permission." and now is ".$result['permission']."\r\n";
-				$problems++;
-			}
-			
-			//il file ha modificato la data
-			if($result['date_modified'] != $checkObj->$result['file']->date_modified){
-				$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file has been modified according the modifify data - last date was ".$checkObj->$result['date_modified']->permission." and now is ".$result['date_modified']."\r\n";
-				$problems++;
-			}
-		
-		}
-	
+			$issues++;
+	}elseif($result['permission'] != $checkObj->$result['file']->permission){
+			// this file has a different set of permission
+			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file has different permissions - it was ".$checkObj->$result['file']->permission." and now is ".$result['permission']."\r\n";
+			$issues++;
+	}elseif($result['date_modified'] != $checkObj->$result['file']->date_modified){
+			//file data has changed
+			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file has been modified according the modifify data - last date was ".$checkObj->$result['date_modified']->permission." and now is ".$result['date_modified']."\r\n";
+			$issues++;
 	}
-
+		
+	// we check for malicious piece of code if file has a different hash or is new 
 	if($scan && !$isFirstRun){
-		// check for malicious pattern in file
+		
 		foreach($patterns as $pattern){
 			
 			if(stripos(preg_replace('/\s+/', '',file_get_contents($result['file'])),$pattern)){
-				
+				//we have a match!!
 				$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - found malicious code pattern '".$pattern."'\r\n";
 				
 				if($setQuarantine) {
-					
+				// we put this file in quarantine	
 					$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " has been put in quarantine and renamed ".$result['filename']. "." . $extQuarantine."'\r\n";
 					rename($result['file'], $result['file'] . "." . $extQuarantine);
 				}
-				
-				
-				$problems++;
+				$issues++;
 			}
 		}
 	}
-
-	
 	
 	return;
 }
@@ -331,9 +323,5 @@ function decodePermission($file){
 function removeComments($string) {
   return strpos($string, '#') === false;
 }
-
-
-
-
 
 ?>
