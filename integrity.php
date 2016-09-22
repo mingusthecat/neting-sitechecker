@@ -133,13 +133,13 @@ file_put_contents($checkFile, $result);
 	$emailBody .= '<b>Found '.$issues.' issues:</b> ' . $mismatchLog . '<br />';		
 
 	//Get settings for debug purpose
-	$emailBody .= '<b>Skip Extensions: </b>' . explode("," , $skipExt) . '<br />';	
+	$emailBody .= '<b>Skip Extensions: </b>' . join("," , $skipExt) . '<br />';	
 
 	//Get settings for debug purpose
-	$emailBody .= '<b>Skip Directories: </b> ' . explode("," , $skipDir) . '<br />';	
+	$emailBody .= '<b>Skip Directories: </b> ' . join("," , $skipDir) . '<br />';	
 
 	//Get settings for debug purpose
-	$emailBody .= '<b>Skip Files: </b>' . explode("," , $skipFile ) . '<br />';	
+	$emailBody .= '<b>Skip Files: </b>' . join("," , $skipFile ) . '<br />';	
 	
 	//Get settings for debug purpose
 	//$emailBody .= '<b>Malicious Patterns:</b> <pre>' . print_r($patterns, true) . '</pre><br /><hr>';	
