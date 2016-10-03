@@ -197,7 +197,7 @@ function checkFile($file){
 	
 	$result['hash'] = hash_file("sha1", $file);
 	$result['date_modified'] = filemtime($file);
-	$result['date_created'] = filectime($file);
+	$result['date_changed'] = filectime($file);
 	$result['size'] = filesize($file);
 	$result['type'] = pathinfo($file, PATHINFO_EXTENSION);
 	$result['permission'] = decodePermission($file);
@@ -236,9 +236,9 @@ function compareResult($result){
 			// this file has a different set of permission
 			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file has different permissions - it was ".$checkObj->$result['file']->permission." and now is ".$result['permission']."\r\n";
 			$issues++;
-	}elseif($result['date_modified'] != $checkObj->$result['file']->date_modified){
+	}elseif($result['date_modified'] != $checkObj->$result['file']->date_modified || $result['date_changed'] != $checkObj->$result['file']->date_changed){
 			//file data has changed
-			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file has been modified according the modifify data - last date was ".$checkObj->$result['date_modified']->permission." and now is ".$result['date_modified']."\r\n";
+			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file data has been modified / changed " ."\r\n";
 			$issues++;
 	}
 		
