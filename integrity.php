@@ -326,12 +326,12 @@ function sendEmail( $to, $subject, $message ){
 	$headers  = 'From: '.$mail . PHP_EOL;
 	$headers .= 'Reply-to: '.$mail . PHP_EOL;
 	$headers .= 'Return-Path: '.$mail . PHP_EOL;
-	$headers .= 'Message-ID: <'.$uniqid.'@'.$_SERVER['SERVER_NAME'].">\n";
+	$headers .= 'Message-ID: <'.$uniqid.'@'.$_SERVER['SERVER_NAME'].">" . PHP_EOL;
 	$headers .= 'MIME-Version: 1.0' . PHP_EOL;
 	$headers .= 'Date: '.gmdate('D, d M Y H:i:s', time()) . PHP_EOL;
 	$headers .= 'X-Priority: 3' . PHP_EOL;
 	$headers .= 'X-MSMail-Priority: Normal' . PHP_EOL;
-	$headers .= 'Content-Type: multipart/mixed;boundary="----------'.$uniqid.'"'."\n\n";
+	$headers .= 'Content-Type: multipart/mixed;boundary="----------'.$uniqid.'"' . PHP_EOL;
 	$headers .= '------------'.$uniqid . PHP_EOL;
 	$headers .= 'Content-type: text/'.$type.';charset='.$charset.''. PHP_EOL;
 	$headers .= 'Content-transfer-encoding: 7bit';
