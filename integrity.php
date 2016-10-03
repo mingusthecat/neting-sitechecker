@@ -238,7 +238,8 @@ function compareResult($result){
 			$issues++;
 	}elseif($result['date_modified'] != $checkObj->$result['file']->date_modified || $result['date_changed'] != $checkObj->$result['file']->date_changed){
 			//file data has changed
-			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file data has been modified / changed " ."\r\n";
+			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file data has been modified -> change data: " .date('Y-m-d H:i:s', $result['date_changed']) ." - modification data: ".  date('Y-m-d H:i:s', $result['date_modified']). "\r\n";
+			$scan = true;
 			$issues++;
 	}
 		
