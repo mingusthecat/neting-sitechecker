@@ -2,7 +2,7 @@
 
 /*
 
-Site Checker - v. 2.2
+Site Checker - v. 2.3
 
 Author: Luca Mainieri
 Author URI: http://www.neting.it
@@ -114,32 +114,35 @@ file_put_contents($checkFile, $result);
 	//dividing with 60 will give the execution time in minutes other wise seconds
 	$execution_time = ($time_end - $time_start)/60;
 
-	$emailBody = '<b>Executed check of: </b> '.PATH.' <br />';
+	//issues reported
+	$emailBody .= 'We have found <b>'.$issues.' issues</b> on this site'.PHP_EOL;	
+
+	$emailBody .= '<b>Executed check of: </b> '.PATH.' '.PHP_EOL;
+
+	//issues reported
+	$emailBody .= 'We have found <b>'.$issues.' issues</b> on this site'.PHP_EOL;	
 
 	//number of files and/or directory found in defined path
-	$emailBody .= '<b>Files / Directories found:</b> '.$i.' <br />';	
+	$emailBody .= '<b>Files / Directories found on path:</b> '.$i.' '.PHP_EOL;	
 	
 	//number of files and/or directory checked by this script
-	$emailBody .= '<b>Files / Directories checked:</b> '.$c.' <br />';	
-	
-	//issues reported
-	$emailBody .= '<b>Check report:</b> '.$issues.' issues <br />';	
+	$emailBody .= '<b>Files / Directories checked:</b> '.$c.' '.PHP_EOL;	
 	
 	//execution time of the script
-	$emailBody .= '<b>Total Execution Time:</b> '.$execution_time.' mins<br />';	
+	$emailBody .= '<b>Total Execution Time:</b> '.$execution_time.' mins'.PHP_EOL;	
 			
 	//Check results
 	if($mismatchLog != '')
-	$emailBody .= '<b>Found '.$issues.' issues:</b> ' . $mismatchLog . '<br />';		
+	$emailBody .= '<b>Found '.$issues.' issues:</b> ' . $mismatchLog . ''.PHP_EOL;		
 
 	//Get settings for debug purpose
-	$emailBody .= '<b>Skip Extensions: </b>' . join("," , $skipExt) . '<br />';	
+	$emailBody .= '<b>Skip Extensions: </b>' . join("," , $skipExt) . ''.PHP_EOL;	
 
 	//Get settings for debug purpose
-	$emailBody .= '<b>Skip Directories: </b> ' . join("," , $skipDir) . '<br />';	
+	$emailBody .= '<b>Skip Directories: </b> ' . join("," , $skipDir) . ''.PHP_EOL;	
 
 	//Get settings for debug purpose
-	$emailBody .= '<b>Skip Files: </b>' . join("," , $skipFile ) . '<br />';	
+	$emailBody .= '<b>Skip Files: </b>' . join("," , $skipFile ) . ''.PHP_EOL;	
 	
 	//Get settings for debug purpose
 	//$emailBody .= '<b>Malicious Patterns:</b> <pre>' . print_r($patterns, true) . '</pre><br /><hr>';	
@@ -151,16 +154,8 @@ file_put_contents($checkFile, $result);
 // send checker email only if checker found something interesting and is not the first run
 if($mismatchLog != '' && !$isFirstRun){
 
-	
-	// To send HTML mail, the Content-type header must be set
-	$headers  = 'MIME-Version: 1.0' . "\r\n";
-	$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-
-	//format html 
-	$emailBody .= str_replace("\r\n","<br/>",$mismatchLog);
-
 	// Send
-	mail($emailAddress, $emailSubject, $emailBody , $headers);
+	sendEmail( $emailAddress, $emailSubject, $emailBody.$mismatchLog );
 	
 	// record and log checker findings
 	file_put_contents($logFile, $mismatchLog, FILE_APPEND);
@@ -170,15 +165,8 @@ if($mismatchLog != '' && !$isFirstRun){
 //debug email
 if($sendDebugEmail){
 
-	// To send HTML mail, the Content-type header must be set
-	$headers  = 'MIME-Version: 1.0' . "\r\n";
-	$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-
-	//format html 
-	$emailBody .= str_replace("\r\n","<br />",$mismatchLog);
-		
 	// send email
-	mail( $debugEmailAddress, $emailSubject, $emailBody, $headers);
+	sendEmail( $debugEmailAddress, $emailSubject, $emailBody );
 
 }
 
@@ -224,22 +212,21 @@ function compareResult($result){
 	
 	if(!property_exists($checkObj, $result['file'])){
 			// this file has been added to structure	
-			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file has been added to site structure \r\n";
+			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file has been added to site structure ".PHP_EOL;
 			$scan = true;
 			$issues++;		
 	}elseif($result['hash'] != $checkObj->$result['file']->hash){
 			// this file has changed
-			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file has a different hash \r\n";
+			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file has a different hash ".PHP_EOL;
 			$scan = true;
 			$issues++;
 	}elseif($result['permission'] != $checkObj->$result['file']->permission){
 			// this file has a different set of permission
-			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file has different permissions - it was ".$checkObj->$result['file']->permission." and now is ".$result['permission']."\r\n";
+			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file has different permissions - it was ".$checkObj->$result['file']->permission." and now is ".$result['permission']."".PHP_EOL;
 			$issues++;
 	}elseif($result['date_modified'] != $checkObj->$result['file']->date_modified || $result['date_changed'] != $checkObj->$result['file']->date_changed){
 			//file data has changed
-			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file data has been modified -> change data: " .date('Y-m-d H:i:s', $result['date_changed']) ." - modification data: ".  date('Y-m-d H:i:s', $result['date_modified']). "\r\n";
-			$scan = true;
+			$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - file data has been modified / changed " ."".PHP_EOL;
 			$issues++;
 	}
 		
@@ -250,11 +237,11 @@ function compareResult($result){
 			
 			if(stripos(preg_replace('/\s+/', '',file_get_contents($result['file'])),$pattern)){
 				//we have a match!!
-				$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - found malicious code pattern '".$pattern."'\r\n";
+				$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " - found malicious code pattern '".$pattern."'".PHP_EOL;
 				
 				if($setQuarantine) {
 				// we put this file in quarantine	
-					$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " has been put in quarantine and renamed ".$result['filename']. "." . $extQuarantine."'\r\n";
+					$mismatchLog .= date("Y-m-d H:i:s") . " - " . $result['file'] . " has been put in quarantine and renamed ".$result['filename']. "." . $extQuarantine."'".PHP_EOL;
 					rename($result['file'], $result['file'] . "." . $extQuarantine);
 				}
 				$issues++;
@@ -324,5 +311,36 @@ function decodePermission($file){
 function removeComments($string) {
   return strpos($string, '#') === false;
 }
+
+
+function sendEmail( $to, $subject, $message ){
+	
+	$type 		= 'html'; // or HTML
+	$charset 	= 'iso-8859-1';
+	
+	$message =  nl2br($message);
+	
+	$from = explode("@", $to);
+	$mail     = 'no-reply@'.$from[1];
+	$uniqid   = md5(uniqid(time()));
+	$headers  = 'From: '.$mail . PHP_EOL;
+	$headers .= 'Reply-to: '.$mail . PHP_EOL;
+	$headers .= 'Return-Path: '.$mail . PHP_EOL;
+	$headers .= 'Message-ID: <'.$uniqid.'@'.$_SERVER['SERVER_NAME'].">\n";
+	$headers .= 'MIME-Version: 1.0' . PHP_EOL;
+	$headers .= 'Date: '.gmdate('D, d M Y H:i:s', time()) . PHP_EOL;
+	$headers .= 'X-Priority: 3' . PHP_EOL;
+	$headers .= 'X-MSMail-Priority: Normal' . PHP_EOL;
+	$headers .= 'Content-Type: multipart/mixed;boundary="----------'.$uniqid.'"'."\n\n";
+	$headers .= '------------'.$uniqid . PHP_EOL;
+	$headers .= 'Content-type: text/'.$type.';charset='.$charset.''. PHP_EOL;
+	$headers .= 'Content-transfer-encoding: 7bit';
+	
+	mail($to, $subject, $message, $headers);
+	
+	return;
+}
+
+
 
 ?>
