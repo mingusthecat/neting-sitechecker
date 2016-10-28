@@ -2,7 +2,7 @@
 
 /*
 
-Site Checker - v. 2.3
+Site Checker - v. 2.4
 
 Author: Luca Mainieri
 Author URI: http://www.neting.it
