@@ -93,7 +93,7 @@ while ($iter->valid()) {
 	if (!$iter->isDot() && !in_array($iter->getSubPath(), $skipDir)) {
 		
         // skip unwanted extensions and files       
-            if (!in_array(pathinfo($iter->key(), PATHINFO_EXTENSION), $skipExt) && !in_array( str_replace (PATH,"",$iter->key()), $skipFile ) ) {
+            if (!in_array(strtolower(pathinfo($iter->key(), PATHINFO_EXTENSION)), $skipExt) && !in_array( str_replace (PATH,"",$iter->key()), $skipFile ) ) {
                 $files[$iter->key()] = checkFile($iter->key());
 				$c++;
             }
@@ -118,9 +118,6 @@ file_put_contents($checkFile, $result);
 	$emailBody .= 'We have found <b>'.$issues.' issues</b> on this site'.PHP_EOL;	
 
 	$emailBody .= '<b>Executed check of: </b> '.PATH.' '.PHP_EOL;
-
-	//issues reported
-	$emailBody .= 'We have found <b>'.$issues.' issues</b> on this site'.PHP_EOL;	
 
 	//number of files and/or directory found in defined path
 	$emailBody .= '<b>Files / Directories found on path:</b> '.$i.' '.PHP_EOL;	
